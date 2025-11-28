@@ -15,6 +15,17 @@ namespace NetSdrClientApp
 {
     public class NetSdrClient
     {
+        // === LAB 2 FIX: Private Constants for Magic Numbers ===
+        private const long DEFAULT_SAMPLE_RATE_HZ = 100000;
+        private const ushort AUTOMATIC_FILTER_MODE = 0;
+        private const byte AD_MODE_VALUE = 0x03;
+        
+        private const byte IQ_DATA_MODE_ENABLED = 0x80;
+        private const byte RECEIVER_STATE_RUN = 0x02;
+        private const byte RECEIVER_STATE_STOP = 0x01;
+        private const byte FIFO_16BIT_MODE = 0x01;
+        private const byte CHANNEL_N = 0x01;
+        private const ushort SAMPLE_SIZE_BITS = 16;
         
        private readonly ITcpClient _tcpClient;
        private readonly IUdpClient _udpClient;
@@ -36,9 +47,9 @@ namespace NetSdrClientApp
             {
                 _tcpClient.Connect();
 
-                var sampleRate = BitConverter.GetBytes((long)100000).Take(5).ToArray();
-                var automaticFilterMode = BitConverter.GetBytes((ushort)0).ToArray();
-                var adMode = new byte[] { 0x00, 0x03 };
+                var sampleRate = BitConverter.GetBytes(DEFAULT_SAMPLE_RATE_HZ).Take(5).ToArray(); // Use constant
+                var automaticFilterMode = BitConverter.GetBytes(AUTOMATIC_FILTER_MODE).ToArray(); // Use constant
+                var adMode = new byte[] { 0x00, AD_MODE_VALUE }; // Use constant
 
                 //Host pre setup
                 var msgs = new List<byte[]>
@@ -68,10 +79,10 @@ namespace NetSdrClientApp
                 return;
             }
 
-            var iqDataMode = (byte)0x80;
-            var start = (byte)0x02;
-            var fifo16bitCaptureMode = (byte)0x01;
-            var n = (byte)1;
+            var iqDataMode = IQ_DATA_MODE_ENABLED;
+            var start = RECEIVER_STATE_RUN;
+            var fifo16bitCaptureMode = FIFO_16BIT_MODE;
+            var n = CHANNEL_N;
 
             var args = new[] { iqDataMode, start, fifo16bitCaptureMode, n };
 
@@ -93,7 +104,7 @@ namespace NetSdrClientApp
                 return;
             }
 
-            var stop = (byte)0x01;
+            var stop = RECEIVER_STATE_STOP;
 
             var args = new byte[] { 0, stop, 0, 0 };
 
@@ -121,7 +132,7 @@ namespace NetSdrClientApp
 private void _udpClient_MessageReceived(object? sender, byte[] e)
 {
     NetSdrMessageHelper.TranslateMessage(e, out _, out _, out _, out byte[] body);
-    var samples = NetSdrMessageHelper.GetSamples(16, body);
+    var samples = NetSdrMessageHelper.GetSamples(SAMPLE_SIZE_BITS, body); // Use constant
 
     Console.WriteLine($"Samples recieved: " + body.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
 
