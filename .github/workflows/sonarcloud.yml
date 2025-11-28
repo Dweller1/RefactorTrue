@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
+  pull-requests: read
 
 jobs:
   sonar-check:
@@ -22,14 +22,14 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      # 1) BEGIN: SonarScanner for .NET - ВИПРАВЛЕНО СИНТАКСИС /k: та /o:
+      # 1) BEGIN: SonarScanner for .NET - ВИПРАВЛЕНО ПРОБЛЕМИ З ПРОДОВЖЕННЯМ РЯДКА
       - name: SonarScanner Begin
         run: |
           dotnet tool install --global dotnet-sonarscanner
           echo "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
           dotnet sonarscanner begin `
-          /k:"Dweller1_RefactorTrue" `      
-          /o:"dweller1" `                 
+          /k:"Dweller1_RefactorTrue" `
+          /o:"dweller1" `
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
           /d:sonar.cs.opencover.reportsPaths="**/coverage.xml" `
           /d:sonar.cpd.cs.minimumTokens=40 `
